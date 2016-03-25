@@ -22,29 +22,45 @@ var projects = [
         }
     ];
 
-var tasks = [
-    {
-        "id": 1,
-        "projectID": 1,
-        "name": "My task",
-        "deadline": 1457529375881,
-        "done": false
-    }
-];
+//var tasks = [
+//    {
+//        "id": 1,
+//        "projectID": 1,
+//        "name": "My task",
+//        "deadline": 1457529375881,
+//        "done": false
+//    }
+//];
 
 
 app.use(express.static(__dirname + '/public'));
 
 app.use(bodyParser.json());
 
+function getTasksFromProject(projects, request) {
+    projects.find((project) => {
+        console.log(project.id, request.params);
+        if (project.id === Number(request.params.project_id)){return project.tasks;}
+    });
+}
+
 // tasks
 
-app.get('/api/projects/:project_id/tasks/', (req, res) => res.json(tasks));
+app.get('/api/projects/:project_id/tasks/', (req, res) => {
+    console.log(getTasksFromProject(projects, req));
+    var tasks = getTasksFromProject(projects, req) || [];
+
+    res.json(tasks)
+});
 
 app.post('/api/projects/:project_id/tasks/', (req, res) => {
+
+    var tasks = getTasksFromProject(projects, req) || [];
+    console.log(tasks);
+
     tasks.push({
         id:Number((Math.random()*100).toFixed(0)),
-        "projectID": 1,
+        "projectID": req.params.project_id,
         'name':req.body.name,
         "deadline": 1457529375881,
         "done": true
@@ -54,34 +70,49 @@ app.post('/api/projects/:project_id/tasks/', (req, res) => {
 
 app.get('/api/projects/:project_id/tasks/:task_id', (req, res) => {
     console.log(req.params);
+
+    var tasks = getTasksFromProject(projects, req) || [];
+
     var task = tasks.find((task) => task.id === Number(req.params.task_id));
     res.json(task)
 });
 
 app.put('/api/projects/:project_id/tasks/:task_id', (req, res) => {
-    tasks.forEach((task, idx) => {
 
+    var tasks = getTasksFromProject(projects, req) || [];
+
+    tasks.forEach((task, idx) => {
         if(task.id === Number(req.params.task_id)) {
             tasks[idx] = Object.assign(tasks[idx], req.body);
         }
     });
-   res.json(projects)
+   res.json(tasks)
 });
 
 app.delete('/api/projects/:project_id/tasks/:task_id', (req, res) => {
-    tasks = tasks.filter((task) => task.id !== Number(req.params.task_id));
+    var tasks = getTasksFromProject(projects, req) || [];
+    var task = tasks.filter((task) => task.id !== Number(req.params.task_id));
 
-   res.json(tasks)
+   res.json(task)
 });
 
 // projects
 app.get('/api/projects', (req, res) => res.json(projects));
 
 app.post('/api/projects', (req, res) => {
+    var projectID = Number((Math.random()*100).toFixed(0));
     projects.push({
-        id: Number((Math.random()*100).toFixed(0)),
+        id: projectID,
         name:req.body.name,
-        tasks:[1,2,3]
+        tasks:[
+            {
+                "id": Number((Math.random()*100).toFixed(0)),
+                "projectID": projectID,
+                "name": "My task",
+                "deadline": 1457529375881,
+                "done": false
+            }
+        ]
     });
     res.json(projects)
 });
@@ -89,7 +120,7 @@ app.post('/api/projects', (req, res) => {
 app.get('/api/projects/:project_id/', (req, res) => {
     var project = projects.find((project) => {
         console.log(typeof project.id , typeof Number(req.params.project_id));
-        return project.id === Number(req.params.project_id)
+        return project.id === Number(req.params.project_id);
 });
      console.log(req.params);
      console.log(project);

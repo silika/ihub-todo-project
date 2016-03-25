@@ -12,7 +12,7 @@ fetch('api/projects')
         .catch((err) => console.log(err));
 
     createTask({name:'My second Task'})
-        .then(() => getTaskById(1))
+        .then(() => getTaskByIdFromProject(1,1))
         .then(() => updateTaskById(1, {'name':'Updated Task'})
         )
         //.then(() => removeTaskBYId(1))
@@ -21,7 +21,7 @@ fetch('api/projects')
 
 //Tasks
 function createTask(task) {
-    return fetch('api/projects/:id/tasks', {
+    return fetch('api/projects/:project_id/tasks', {
         method:'POST',
         body:JSON.stringify(task),
         headers: {
@@ -31,13 +31,19 @@ function createTask(task) {
 }
 
 function getTaskById(id) {
-    return fetch('/api/projects/:id/tasks/' + id)
+    return fetch('/api/projects/:project_id/tasks/' + id)
+        .then((res) => res.json())
+        .then((json) => console.log(json));
+}
+
+function getTaskByIdFromProject(id, project_id) {
+    return fetch('/api/projects/'+ project_id +'/tasks/' + id)
         .then((res) => res.json())
         .then((json) => console.log(json));
 }
 
 function updateTaskById(id, task){
-    return fetch('/api/projects/:id/tasks/' + id, {
+    return fetch('/api/projects/:project_id/tasks/' + id, {
         method:'PUT',
         body:JSON.stringify(task),
         headers: {
@@ -49,7 +55,7 @@ function updateTaskById(id, task){
 }
 
 function removeTaskBYId(id) {
-    return fetch('/api/projects/:id/tasks/' + id, {
+    return fetch('/api/projects/:project_id/tasks/' + id, {
         method:'DELETE'
     })
     .then((res) => res.json())
