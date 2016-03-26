@@ -22,26 +22,17 @@ var projects = [
         }
     ];
 
-//var tasks = [
-//    {
-//        "id": 1,
-//        "projectID": 1,
-//        "name": "My task",
-//        "deadline": 1457529375881,
-//        "done": false
-//    }
-//];
-
-
 app.use(express.static(__dirname + '/public'));
 
 app.use(bodyParser.json());
 
 function getTasksFromProject(projects, request) {
-    projects.find((project) => {
-        console.log(project.id, request.params);
-        if (project.id === Number(request.params.project_id)){return project.tasks;}
+    if (request.params.project_id === ':project_id') request.params.project_id = 1;
+    var currentProject = projects.find((project) => {
+        return project.id === Number(request.params.project_id)
     });
+    console.log(currentProject);
+    return currentProject.tasks;
 }
 
 // tasks
